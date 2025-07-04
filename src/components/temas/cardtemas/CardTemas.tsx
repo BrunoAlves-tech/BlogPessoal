@@ -21,18 +21,15 @@ function CardTemas({ tema }: CardTemasProps) {
                     <button>Editar</button>
                 </Link>
 
-                <Link to='' className='text-slate-100 bg-red-400 hover:bg-red-700 w-full 
-                    flex items-center justify-center'>
+                <Link to={`/deletartema/${tema.id}`}
+                    className='text-slate-100 bg-red-400 hover:bg-red-700 w-full 
+		                flex items-center justify-center'>
                     <button>Deletar</button>
                 </Link>
-            </div>O Typescript (Javascript) por si é síncrono, o que significa que todas às suas funções são lidas uma após à outra. Para quebrarmos esse paradigma usamos funções …
-Grupo de escolhas da pergunta
 
-Async Await
-
-Export const
-
-Export const Export Class
+                
+                
+            </div>
 
         </div>
     )
