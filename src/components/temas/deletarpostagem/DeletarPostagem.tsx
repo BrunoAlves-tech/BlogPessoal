@@ -1,64 +1,68 @@
-import { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../../../contexts/AuthContext";
-import type Tema from "../../../models/Tema";
+import { useState, useContext, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { AuthContext } from "../../../contexts/AuthContext";
+import type Postagem from "../../../models/Postagem";
 import { buscar, deletar } from "../../../services/Service";
 import { RotatingLines } from "react-loader-spinner";
 import { ToastAlerta } from "../../../utils/TostAlerta";
 
 
-function DeletarTema() {
+function DeletarPostagem() {
   const navigate = useNavigate();
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [postagem, setPostagem] = useState<Postagem>({} as Postagem);
 
-  const [tema, setTema] = useState<Tema>({} as Tema);
+  const { id } = useParams<{ id: string }>();
 
   const { usuario, handleLogout } = useContext(AuthContext);
   const token = usuario.token;
 
-  const { id } = useParams<{ id: string }>();
-
-  async function buscarTemaPorId(id: string) {
+  async function buscarPorId(id: string) {
     try {
-      await buscar(`/temas/${id}`, setTema, {
-        headers: { Authorization: token },
+      await buscar(`/postagens/${id}`, setPostagem, {
+        headers: {
+          Authorization: token,
+        },
       });
-    } catch (error: unknown) {
-      if (error instanceof Error && error.message.includes("401")) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      if (error.toString().includes("403")) {
         handleLogout();
-      } else {
-        console.error("Erro inesperado:", error);
       }
     }
   }
 
   useEffect(() => {
     if (token === "") {
-      ToastAlerta("Você precisa estar logado!", "info");
+      ToastAlerta("Você precisa estar logado", "info");
       navigate("/login");
     }
+  }, [token]);
 
+  useEffect(() => {
     if (id !== undefined) {
-      buscarTemaPorId(id);
+      buscarPorId(id);
     }
-  }, [id, token]);
+  }, [id]);
 
-  async function deletarTema() {
+  async function deletarPostagem() {
     setIsLoading(true);
 
     try {
-      await deletar(`/temas/${id}`, {
-        headers: { Authorization: token },
+      await deletar(`/postagens/${id}`, {
+        headers: {
+          Authorization: token,
+        },
       });
 
-      ToastAlerta("Tema excluído com sucesso!", "sucesso");
-    } catch (error: unknown) {
-      if (error instanceof Error && error.message.includes("401")) {
+      ToastAlerta("Postagem apagada com sucesso", "info");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      if (error.toString().includes("403")) {
         handleLogout();
       } else {
-        ToastAlerta("Erro ao excluir o tema!", "erro");
-        console.error(error);
+        ToastAlerta("Erro ao deletar a postagem!", "erro");
       }
     }
 
@@ -67,20 +71,25 @@ function DeletarTema() {
   }
 
   function retornar() {
-    navigate("/temas");
+    navigate("/postagens");
   }
 
   return (
     <div className="container w-1/3 mx-auto">
-      <h1 className="text-4xl text-center my-4">Deletar tema</h1>
+      <h1 className="text-4xl text-center my-4">Deletar Postagem</h1>
+
       <p className="text-center font-semibold mb-4">
-        Você tem certeza de que deseja apagar o tema a seguir?
+        Você tem certeza de que deseja apagar a postagem a seguir?
       </p>
+
       <div className="border flex flex-col rounded-2xl overflow-hidden justify-between">
         <header className="py-2 px-6 bg-indigo-600 text-white font-bold text-2xl">
-          Tema
+          Postagem
         </header>
-        <p className="p-8 text-3xl bg-slate-200 h-full">{tema.descricao}</p>
+        <div className="p-4">
+          <p className="text-xl h-full">{postagem.titulo}</p>
+          <p>{postagem.texto}</p>
+        </div>
         <div className="flex">
           <button
             className="text-slate-100 bg-red-400 hover:bg-red-600 w-full py-2"
@@ -89,8 +98,9 @@ function DeletarTema() {
             Não
           </button>
           <button
-            className="w-full text-slate-100 bg-indigo-400 hover:bg-indigo-600 flex items-center justify-center"
-            onClick={deletarTema}
+            className="w-full text-slate-100 bg-indigo-400 
+                        hover:bg-indigo-600 flex items-center justify-center"
+            onClick={deletarPostagem}
           >
             {isLoading ? (
               <RotatingLines
@@ -109,4 +119,5 @@ function DeletarTema() {
     </div>
   );
 }
-export default DeletarTema;
+
+export default DeletarPostagem;
